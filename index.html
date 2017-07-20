@@ -4,7 +4,114 @@
     <meta charset="UTF-8">
     <title>Title</title>
 </head>
-<body>
+<body onload="startGame()">
 
+<button onclick="componente.cima()"  style="position: absolute; left: 50%;">cima</button>
+<button onclick="componente.baixo()"  style="position: absolute; left: 55%;">Baixo</button>
+<script>
+    var componente;
+    var obstaculos = [];
+
+    var myGameArea = {
+        canvas: document.createElement("canvas"),
+        start: function () {
+            this.canvas.width = 1000;
+            this.canvas.height = 1000;
+            this.context = this.canvas.getContext("2d");
+            document.body.insertBefore(this.canvas, document.body.childNodes[0]);
+            this.frameNo = 0;
+            this.interval = setInterval(updateGameArea, 20);
+        },
+        clear: function () {
+            this.context.clearRect(0, 0, this.canvas.width, this.canvas.height);
+        }
+    }
+
+    function keylistener(event){
+        console.log(event);
+        if(event.keyCode== 119 ){
+            componente.cima();
+        }else if(event.keyCode== 115 ){
+            componente.baixo()
+        }
+    }
+    document.addEventListener('keypress', keylistener);
+
+    function startGame() {
+        myGameArea.start();
+        componente = new carro(30, 30, "red", 0, 500);
+        componente.recarregar();
+    }
+
+
+    function carro(width, height, color, x, y) {
+        this.width = width;
+        this.height = height;
+        this.x = x;
+        this.y = y;
+        var ctx = myGameArea.context;
+        this.recarregar = function () {
+            ctx.fillStyle = color;
+            ctx.fillRect(this.x, this.y, this.width, this.height);
+        }
+        this.cima = function () {
+            ctx.clearRect(this.x, this.y, this.width, this.height);
+            this.y = this.y - 50;
+            ctx.fillRect(this.x, this.y, this.width, this.height);
+            console.log(this.y);
+        }
+
+        this.baixo = function () {
+            ctx.clearRect(this.x, this.y, this.width, this.height);
+            this.y = this.y + 50;
+            ctx.fillRect(this.x, this.y, this.width, this.height);
+
+        }
+
+        this.crashWith = function (otherobj) {
+            var myleft = this.x;
+            var myright = this.x + (this.width);
+            var mytop = this.y;
+            var mybottom = this.y + (this.height);
+            var otherleft = otherobj.x;
+            var otherright = otherobj.x + (otherobj.width);
+            var othertop = otherobj.y;
+            var otherbottom = otherobj.y + (otherobj.height);
+            var crash = true;
+            if ((mybottom < othertop) || (mytop > otherbottom) || (myright < otherleft) || (myleft > otherright)) {
+                crash = false;
+            }
+            return crash;
+        }
+    }
+
+    function updateGameArea() {
+        var x, height, gap, minHeight, maxHeight, minGap, maxGap;
+        for (i = 0; i < obstaculos.length; i += 1) {
+            if (componente.crashWith(obstaculos[i])) {
+                return;
+            }
+        }
+        myGameArea.clear();
+        myGameArea.frameNo += 1;
+        if (myGameArea.frameNo == 1) {
+            x = myGameArea.canvas.width;
+            minHeight = 20;
+            maxHeight = 200;
+            height = Math.floor(Math.random() * (maxHeight - minHeight + 1) + minHeight);
+            minGap = 50;
+            maxGap = 200;
+            gap = Math.floor(Math.random() * (maxGap - minGap + 1) + minGap);
+            obstaculos.push(new carro(10, height, "green", x, 0));
+            obstaculos.push(new carro(10, x - height - gap, "green", x, height + gap));
+        }
+        for (i = 0; i < obstaculos.length; i += 1) {
+            obstaculos[i].x += -15;
+            obstaculos[i].recarregar();
+        }
+        componente.recarregar();
+    }
+
+</script>
 </body>
 </html>
